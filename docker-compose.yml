@@ -1,0 +1,16 @@
+
+services:
+
+  nordvpn_get_wireguard_config:
+    image: nordvpn_get_wireguard_config
+    build:
+      context: "./build"
+    container_name: nordvpn_get_wireguard_config
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - TOKEN
+      - API_QUERY
+      - DNS_SERVER
+    volumes:
+      - ./output:/output
