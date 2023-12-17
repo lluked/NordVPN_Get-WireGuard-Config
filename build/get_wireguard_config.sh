@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Clear the output folder
+rm -f -r /output/*
+
 # Get the chosen server
 api_response=$(curl -s ${API_QUERY:-"https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_technologies\]\[identifier\]=wireguard_udp&limit=1"})
 server_identifier=$(jq -r '.[]|.hostname' <<< "$api_response" | cut -d "." -f 1)
@@ -20,9 +23,9 @@ echo "############################################################"
 echo ""
 
 # Get client details
-nordvpn login --token "${TOKEN}"
-nordvpn set technology NordLynx 2>&1 >/dev/null
-nordvpn connect "$server_identifier" 2>&1 >/dev/null
+nordvpn login --token "${TOKEN}" || { echo 'exiting...' ; exit 1; }
+nordvpn set technology NordLynx|| { nordvpn logout --persist-token; echo 'exiting...'; exit 1; }
+nordvpn connect "$server_identifier" || { nordvpn logout --persist-token; echo 'exiting...'; exit 1; }
 
 client_private_key=$(wg show nordlynx private-key)
 client_ip_address=$(ip -o addr show dev nordlynx | awk '$3 == "inet" {print $4}')
@@ -52,9 +55,10 @@ echo "##################### WireGuard Config #####################"
 echo "$config"
 echo "############################################################"
 
-# Write config
-rm -f -r /output/*
+# Write config to the putput folder
 echo "$config" > "/output/nordvpn-$server_identifier.conf"
 
-# Disconnect
+# Close out
 nordvpn disconnect
+nordvpn logout --persist-token
+exit 0
