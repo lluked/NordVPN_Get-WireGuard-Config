@@ -24,8 +24,8 @@ echo ""
 
 # Get client details
 nordvpn login --token "${TOKEN}" || { echo 'exiting...' ; exit 1; }
-nordvpn set technology NordLynx|| { echo 'exiting...'; exit 1; }
-nordvpn connect "$server_identifier" || { echo 'exiting...'; exit 1; }
+nordvpn set technology NordLynx|| { nordvpn logout --persist-token; echo 'exiting...'; exit 1; }
+nordvpn connect "$server_identifier" || { nordvpn logout --persist-token; echo 'exiting...'; exit 1; }
 
 client_private_key=$(wg show nordlynx private-key)
 client_ip_address=$(ip -o addr show dev nordlynx | awk '$3 == "inet" {print $4}')
@@ -60,5 +60,5 @@ echo "$config" > "/output/nordvpn-$server_identifier.conf"
 
 # Close out
 nordvpn disconnect
-nordvpn logout
+nordvpn logout --persist-token
 exit 0
