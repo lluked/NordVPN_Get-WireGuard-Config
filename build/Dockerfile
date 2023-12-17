@@ -1,15 +1,19 @@
 FROM ubuntu:22.04
 
-ARG NORDVPN_VERSION=${NORDVPN_VERSION:-3.16.5}
+ARG NORDVPN_VERSION=${NORDVPN_VERSION:-3.16.9}
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install -y curl iputils-ping wireguard-tools jq && \
+    apt-get install -y \
+        curl \
+        jq \
+        iputils-ping \
+        wireguard-tools && \
     curl https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/nordvpn-release_1.0.0_all.deb -o "/tmp/nordrepo.deb" && \
     apt-get install -y /tmp/nordrepo.deb && \
     apt-get update && \
-    apt-get install -y nordvpn${NORDVPN_VERSION:+=$NORDVPN_VERSION} && \
-    apt-get remove -y wget nordvpn-release && \
+    apt-get install -y nordvpn=${NORDVPN_VERSION} && \
+    apt-get remove -y nordvpn-release && \
     rm /tmp/nordrepo.deb && \
     apt-get clean
 
